@@ -4,7 +4,7 @@
 
     Author: Explore Data Science Academy.
 
-    Note:
+    Note:  
     ---------------------------------------------------------------------
     Please follow the instructions provided within the README.md file
     located within this directory for guidance on how to use this script
@@ -24,6 +24,7 @@
 # Helper Dependencies
 import numpy as np
 import pandas as pd
+from sklearn.preprocessing import StandardScaler
 import pickle
 import json
 
@@ -32,21 +33,6 @@ def _preprocess_data(data):
     
     df_train = pd.read_csv('df_train.csv') # load the train data
     df_test = pd.read_csv('df_test.csv')  # load the test data
-    incl = ['Valencia_wind_deg']
-    df_in = df_train[incl]
-    
-# Iterating over non numeric data and filling in Nan values with 0
-    categoricals = []
-    for col, col_type in df_in.dtypes.iteritems():
-        if col_type == 'O':
-            categoricals.append(col)
-        else:
-            df_in[col].fillna(0, inplace=True)
-           
-     df_ohe = pd.get_dummies(df_in, columns=categoricals, dummy_na=True)
-     df_train['Valencia_pressure'].fillna(df_train['Valencia_pressure'].mean(), inplace = True)
-     
-
 
     NB: If you have utilised feature engineering/selection in order to create
     your final model you will need to define the code here.
@@ -76,7 +62,64 @@ def _preprocess_data(data):
     # ---------------------------------------------------------------
 
     # ----------- Replace this code with your own preprocessing steps --------
-    predict_vector = feature_vector_df[['Madrid_wind_speed','Bilbao_rain_1h','Valencia_wind_speed']]
+    #imputing missing values
+    df_test['Valencia_pressure'] = df_test['Valencia_pressure'].fillna(df_test['Valencia_pressure'].mode()[0])
+    # impute the mode
+    df_train['Valencia_pressure'] = df_train['Valencia_pressure'].fillna(df_train['Valencia_pressure'].mode()[0])
+
+    # extracting the number from the string 
+    df_test['Valencia_wind_deg'] = df_test['Valencia_wind_deg'].str.extract('(\d+)').astype('int64')
+
+# extracting the number from the string 
+    df_train['Valencia_wind_deg'] = df_train['Valencia_wind_deg'].str.extract('(\d+)').astype('int64')
+
+# change the train data type to integer
+    df_test['Valencia_wind_deg'] = pd.to_numeric(df_test['Valencia_wind_deg'])
+ 
+
+    # change the test data type to integer
+    df_train['Valencia_wind_deg'] = pd.to_numeric(df_train['Valencia_wind_deg'])
+ 
+
+    # extracting the number from the string 
+    df_train['Seville_pressure'] = df_train['Seville_pressure'].str.extract('(\d+)').astype('int64')
+
+# extracting the number from the string 
+    df_test['Seville_pressure'] = df_test['Seville_pressure'].str.extract('(\d+)').astype('int64')
+
+# change the data type to integer
+    df_test['Seville_pressure'] = pd.to_numeric(df_test['Seville_pressure'])
+ 
+    # change the data type to integer
+    df_train['Seville_pressure'] = pd.to_numeric(df_train['Seville_pressure'])
+ 
+    df_train['Year']  = df_train['time'].astype('datetime64').dt.year
+    df_train['Month_of_year']  = df_train['time'].astype('datetime64').dt.month
+    df_train['Week_of_year'] = df_train['time'].astype('datetime64').dt.weekofyear
+    df_train['Day_of_year']  = df_train['time'].astype('datetime64').dt.dayofyear
+    df_train['Day_of_month']  = df_train['time'].astype('datetime64').dt.day
+    df_train['Day_of_week'] = df_train['time'].astype('datetime64').dt.dayofweek
+    df_train['Hour_of_week'] = ((df_train['time'].astype('datetime64').dt.dayofweek) * 24 + 24) - (24 - df_train['time'].astype('datetime64').dt.hour)
+    df_train['Hour_of_day']  = df_train['time'].astype('datetime64').dt.hour
+
+    df_train = df_train.drop(columns=['Week_of_year','Day_of_year','Hour_of_week', 'Unnamed: 0','time'])
+    df_test = df_test.drop(columns=['Week_of_year','Day_of_year','Hour_of_week', 'Unnamed: 0','time'])
+    
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+    X_scaled = pd.DataFrame(X_scaled,columns=X.columns)
+    
+    predict_vector = feature_vector_df[['Madrid_wind_speed', 'Valencia_wind_deg', 'Bilbao_rain_1h',
+       'Valencia_wind_speed', 'Seville_humidity', 'Madrid_humidity',
+       'Bilbao_clouds_all', 'Bilbao_wind_speed', 'Seville_clouds_all',
+       'Bilbao_wind_deg', 'Barcelona_wind_speed', 'Barcelona_wind_deg',
+       'Madrid_clouds_all', 'Seville_wind_speed', 'Barcelona_rain_1h',
+       'Seville_pressure', 'Seville_rain_1h', 'Bilbao_snow_3h',
+       'Barcelona_pressure', 'Seville_rain_3h', 'Madrid_rain_1h',
+       'Barcelona_rain_3h', 'Valencia_snow_3h', 'Madrid_weather_id',
+       'Barcelona_weather_id', 'Bilbao_pressure', 'Seville_weather_id',
+       'Valencia_pressure', 'Seville_temp_max', 'Bilbao_weather_id', 
+        'Valencia_humidity', 'Year', 'Month_of_year', 'Day_of_month', 'Day_of_week', 'Hour_of_day']]
     # ------------------------------------------------------------------------
 
     return predict_vector
@@ -97,7 +140,7 @@ def load_model(path_to_model:str):
         The pretrained model loaded into memory.
 
     """
-    return pickle.load(open(path_to_model, 'rb'))
+    return pickle.load(open(path_to_model, 'ranf'))
 
 
 """ You may use this section (above the make_prediction function) of the python script to implement 
