@@ -62,20 +62,14 @@ def _preprocess_data(data):
     # ---------------------------------------------------------------
 
     # ----------- Replace this code with your own preprocessing steps --------
-    #imputing missing values
-    df_test['Valencia_pressure'] = df_test['Valencia_pressure'].fillna(df_test['Valencia_pressure'].mode()[0])
+        #imputing missing values
     # impute the mode
     df_train['Valencia_pressure'] = df_train['Valencia_pressure'].fillna(df_train['Valencia_pressure'].mode()[0])
 
-    # extracting the number from the string 
-    df_test['Valencia_wind_deg'] = df_test['Valencia_wind_deg'].str.extract('(\d+)').astype('int64')
 
 # extracting the number from the string 
     df_train['Valencia_wind_deg'] = df_train['Valencia_wind_deg'].str.extract('(\d+)').astype('int64')
 
-# change the train data type to integer
-    df_test['Valencia_wind_deg'] = pd.to_numeric(df_test['Valencia_wind_deg'])
- 
 
     # change the test data type to integer
     df_train['Valencia_wind_deg'] = pd.to_numeric(df_train['Valencia_wind_deg'])
@@ -84,11 +78,7 @@ def _preprocess_data(data):
     # extracting the number from the string 
     df_train['Seville_pressure'] = df_train['Seville_pressure'].str.extract('(\d+)').astype('int64')
 
-# extracting the number from the string 
-    df_test['Seville_pressure'] = df_test['Seville_pressure'].str.extract('(\d+)').astype('int64')
 
-# change the data type to integer
-    df_test['Seville_pressure'] = pd.to_numeric(df_test['Seville_pressure'])
  
     # change the data type to integer
     df_train['Seville_pressure'] = pd.to_numeric(df_train['Seville_pressure'])
@@ -103,13 +93,13 @@ def _preprocess_data(data):
     df_train['Hour_of_day']  = df_train['time'].astype('datetime64').dt.hour
 
     df_train = df_train.drop(columns=['Week_of_year','Day_of_year','Hour_of_week', 'Unnamed: 0','time'])
-    df_test = df_test.drop(columns=['Week_of_year','Day_of_year','Hour_of_week', 'Unnamed: 0','time'])
+
     
     scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X)
-    X_scaled = pd.DataFrame(X_scaled,columns=X.columns)
+    X_scaled = scaler.fit_transform(df_train)
+    X_scaled = pd.DataFrame(X_scaled,columns=df_train.columns)
     
-    predict_vector = feature_vector_df[['Madrid_wind_speed', 'Valencia_wind_deg', 'Bilbao_rain_1h',
+    predict_vector = X_scaled[['Madrid_wind_speed', 'Valencia_wind_deg', 'Bilbao_rain_1h',
        'Valencia_wind_speed', 'Seville_humidity', 'Madrid_humidity',
        'Bilbao_clouds_all', 'Bilbao_wind_speed', 'Seville_clouds_all',
        'Bilbao_wind_deg', 'Barcelona_wind_speed', 'Barcelona_wind_deg',
@@ -118,8 +108,13 @@ def _preprocess_data(data):
        'Barcelona_pressure', 'Seville_rain_3h', 'Madrid_rain_1h',
        'Barcelona_rain_3h', 'Valencia_snow_3h', 'Madrid_weather_id',
        'Barcelona_weather_id', 'Bilbao_pressure', 'Seville_weather_id',
-       'Valencia_pressure', 'Seville_temp_max', 'Bilbao_weather_id', 
-        'Valencia_humidity', 'Year', 'Month_of_year', 'Day_of_month', 'Day_of_week', 'Hour_of_day']]
+       'Valencia_pressure', 'Seville_temp_max', 'Madrid_pressure',
+       'Valencia_temp_max', 'Valencia_temp', 'Bilbao_weather_id',
+       'Seville_temp', 'Valencia_humidity', 'Valencia_temp_min',
+       'Barcelona_temp_max', 'Madrid_temp_max', 'Barcelona_temp',
+       'Bilbao_temp_min', 'Bilbao_temp', 'Barcelona_temp_min',
+       'Bilbao_temp_max', 'Seville_temp_min', 'Madrid_temp', 'Madrid_temp_min',
+       'Year', 'Month_of_year', 'Day_of_month', 'Day_of_week', 'Hour_of_day']]
     # ------------------------------------------------------------------------
 
     return predict_vector
@@ -140,7 +135,7 @@ def load_model(path_to_model:str):
         The pretrained model loaded into memory.
 
     """
-    return pickle.load(open(path_to_model, 'ranf'))
+    return pickle.load(open(path_to_model, 'rb'))
 
 
 """ You may use this section (above the make_prediction function) of the python script to implement 
