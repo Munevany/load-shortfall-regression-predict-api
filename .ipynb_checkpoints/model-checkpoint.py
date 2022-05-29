@@ -62,14 +62,10 @@ def _preprocess_data(data):
     # ---------------------------------------------------------------
 
     # ----------- Replace this code with your own preprocessing steps --------
-        #imputing missing values
-    # impute the mode
     df_train['Valencia_pressure'] = df_train['Valencia_pressure'].fillna(df_train['Valencia_pressure'].mode()[0])
 
-
-# extracting the number from the string 
+    # extracting the number from the string 
     df_train['Valencia_wind_deg'] = df_train['Valencia_wind_deg'].str.extract('(\d+)').astype('int64')
-
 
     # change the test data type to integer
     df_train['Valencia_wind_deg'] = pd.to_numeric(df_train['Valencia_wind_deg'])
@@ -77,8 +73,6 @@ def _preprocess_data(data):
 
     # extracting the number from the string 
     df_train['Seville_pressure'] = df_train['Seville_pressure'].str.extract('(\d+)').astype('int64')
-
-
  
     # change the data type to integer
     df_train['Seville_pressure'] = pd.to_numeric(df_train['Seville_pressure'])
@@ -94,10 +88,12 @@ def _preprocess_data(data):
 
     df_train = df_train.drop(columns=['Week_of_year','Day_of_year','Hour_of_week', 'Unnamed: 0','time'])
 
-    
+    y_train = df_train[['load_shortfall_3h']]
+    X_train = df_train[:len(df_train)].drop('load_shortfall_3h', axis=1)
+
     scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(df_train)
-    X_scaled = pd.DataFrame(X_scaled,columns=df_train.columns)
+    X_scaled = scaler.fit_transform(X_train)
+    X_scaled = pd.DataFrame(X_scaled,columns=X_train.columns)
     
     predict_vector = feature_vector_df[['Madrid_wind_speed', 'Valencia_wind_deg', 'Bilbao_rain_1h',
        'Valencia_wind_speed', 'Seville_humidity', 'Madrid_humidity',
@@ -115,6 +111,7 @@ def _preprocess_data(data):
        'Bilbao_temp_min', 'Bilbao_temp', 'Barcelona_temp_min',
        'Bilbao_temp_max', 'Seville_temp_min', 'Madrid_temp', 'Madrid_temp_min',
        'Year', 'Month_of_year', 'Day_of_month', 'Day_of_week', 'Hour_of_day']]
+
     # ------------------------------------------------------------------------
 
     return predict_vector
