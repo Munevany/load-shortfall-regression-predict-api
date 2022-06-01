@@ -31,9 +31,6 @@ import json
 def _preprocess_data(data):
     """Private helper function to preprocess data for model prediction.
     
-    df_train = pd.read_csv('df_train.csv') # load the train data
-    df_test = pd.read_csv('df_test.csv')  # load the test data
-
     NB: If you have utilised feature engineering/selection in order to create
     your final model you will need to define the code here.
 
@@ -62,38 +59,16 @@ def _preprocess_data(data):
     # ---------------------------------------------------------------
 
     # ----------- Replace this code with your own preprocessing steps --------
-    df_train['Valencia_pressure'] = df_train['Valencia_pressure'].fillna(df_train['Valencia_pressure'].mode()[0])
+    #Only including features that are categorical 
+    
+    
+  
+    y_train = feature_vector_df[['load_shortfall_3h']]
+    X_train = feature_vector_df[:len(feature_vector_df)].drop('load_shortfall_3h', axis=1)
 
-    # extracting the number from the string 
-    df_train['Valencia_wind_deg'] = df_train['Valencia_wind_deg'].str.extract('(\d+)').astype('int64')
-
-    # change the test data type to integer
-    df_train['Valencia_wind_deg'] = pd.to_numeric(df_train['Valencia_wind_deg'])
- 
-
-    # extracting the number from the string 
-    df_train['Seville_pressure'] = df_train['Seville_pressure'].str.extract('(\d+)').astype('int64')
- 
-    # change the data type to integer
-    df_train['Seville_pressure'] = pd.to_numeric(df_train['Seville_pressure'])
- 
-    df_train['Year']  = df_train['time'].astype('datetime64').dt.year
-    df_train['Month_of_year']  = df_train['time'].astype('datetime64').dt.month
-    df_train['Week_of_year'] = df_train['time'].astype('datetime64').dt.weekofyear
-    df_train['Day_of_year']  = df_train['time'].astype('datetime64').dt.dayofyear
-    df_train['Day_of_month']  = df_train['time'].astype('datetime64').dt.day
-    df_train['Day_of_week'] = df_train['time'].astype('datetime64').dt.dayofweek
-    df_train['Hour_of_week'] = ((df_train['time'].astype('datetime64').dt.dayofweek) * 24 + 24) - (24 - df_train['time'].astype('datetime64').dt.hour)
-    df_train['Hour_of_day']  = df_train['time'].astype('datetime64').dt.hour
-
-    df_train = df_train.drop(columns=['Week_of_year','Day_of_year','Hour_of_week', 'Unnamed: 0','time'])
-
-    y_train = df_train[['load_shortfall_3h']]
-    X_train = df_train[:len(df_train)].drop('load_shortfall_3h', axis=1)
-
-    scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X_train)
-    X_scaled = pd.DataFrame(X_scaled,columns=X_train.columns)
+    #scaler = StandardScaler()
+    #X_scaled = scaler.fit_transform(X_train)
+    #X_scaled = pd.DataFrame(X_scaled,columns=X_train.columns)
     
     predict_vector = feature_vector_df[['Madrid_wind_speed', 'Valencia_wind_deg', 'Bilbao_rain_1h',
        'Valencia_wind_speed', 'Seville_humidity', 'Madrid_humidity',
